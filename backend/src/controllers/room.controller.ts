@@ -66,3 +66,51 @@ export const getRooms: RequestHandler = async (req, res): Promise<void> => {
         res.status(500).json({ error: 'Failed to fetch rooms' });
     }
 };
+
+export const joinRoom: RequestHandler = async (req, res): Promise<void> => {
+    try {
+        const { roomId } = req.params;
+        const userId = req.user.userId;
+
+        const room = await prisma.room.update({
+            where: { id: roomId },
+            data: {
+                participants: {
+                    connect: { id: userId }
+                }
+            },
+            include: {
+                host: {
+                    select: { id: true, name: true }
+                },
+                participants: {
+                    select: { id: true, name: true }
+                }
+            }
+        });
+
+        res.json(room);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to join room' });
+    }
+};
+
+export const leaveRoom: RequestHandler = async (req, res): Promise<void> => {
+    try {
+        const { roomId } = req.params;
+        const userId = req.user.userId;
+
+        const room = await prisma.room.update({
+            where: { id: roomId },
+            data: {
+                participants: {
+                    disconnect: { id: userId }
+                }
+            }
+        });
+
+        res.json({ message: 'Left room successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to leave room' });
+    }
+};
