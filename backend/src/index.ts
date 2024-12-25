@@ -1,17 +1,22 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import authRoutes from './routes/auth.routes';
+import roomRoutes from './routes/room.routes';
+
 
 dotenv.config();
 const app = express();
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
