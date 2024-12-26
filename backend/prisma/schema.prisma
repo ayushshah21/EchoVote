@@ -14,17 +14,18 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  password     String // For email/password auth
-  spotifyId    String? // Optional: for Spotify-connected users
-  spotifyToken String? // Optional: to store Spotify access token
-  rooms        Room[]   @relation("RoomParticipants")
-  hostedRooms  Room[]   @relation("HostRoom")
-  votes        Vote[] // Track user votes
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String   @id @default(uuid())
+  name                String
+  email               String   @unique
+  password            String // For email/password auth
+  spotifyId           String? // Optional: for Spotify-connected users
+  spotifyToken        String? // Optional: to store Spotify access token
+  spotifyRefreshToken String? 
+  rooms               Room[]   @relation("RoomParticipants")
+  hostedRooms         Room[]   @relation("HostRoom")
+  votes               Vote[] // Track user votes
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model Room {
