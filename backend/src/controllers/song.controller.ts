@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { PrismaClient } from '@prisma/client';
 import SpotifyWebApi from 'spotify-web-api-node';
+import { socketService } from '../index';
 
 const prisma = new PrismaClient();
 const spotify = new SpotifyWebApi({
@@ -40,6 +41,12 @@ export const addSong: RequestHandler = async (req, res): Promise<void> => {
             include: {
                 votes: true
             }
+        });
+
+        // Broadcast to room that new song was added
+        socketService.broadcastToRoom(roomId, {
+            type: 'song_added',
+            song
         });
 
         res.status(201).json(song);

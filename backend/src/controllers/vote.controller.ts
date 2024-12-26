@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { socketService } from '../index';
 
 const prisma = new PrismaClient();
 
@@ -44,8 +45,15 @@ export const voteSong: RequestHandler = async (req, res): Promise<void> => {
             })
         ]);
 
+        // Broadcast vote update
+        socketService.broadcastToRoom(song.roomId, {
+            type: 'vote_updated',
+            songId: song.id,
+            totalVotes: song.totalVotes
+        });
+
         res.json(song);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to vote for song' });
+        res.status(500).json({ error: 'Failed to vote' });
     }
 };
