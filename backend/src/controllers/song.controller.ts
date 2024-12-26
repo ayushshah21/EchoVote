@@ -78,22 +78,33 @@ export const getQueue: RequestHandler = async (req, res): Promise<void> => {
 export const searchSongs: RequestHandler = async (req, res): Promise<void> => {
     try {
         const { query } = req.query;
-        const userId = req.user.userId;
+        const { roomId } = req.params;
 
-        const host = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { spotifyToken: true }
+        // Get room's host
+        const room = await prisma.room.findUnique({
+            where: { id: roomId },
+            include: {
+                host: {
+                    select: {
+                        spotifyToken: true
+                    }
+                }
+            }
         });
 
-        if (!host?.spotifyToken) {
-            res.status(403).json({ error: 'Host not connected to Spotify' });
+        if (!room) {
+            res.status(404).json({ error: 'Room not found' });
             return;
         }
 
-        spotify.setAccessToken(host.spotifyToken);
+        if (!room.host.spotifyToken) {
+            res.status(403).json({ error: 'Room host not connected to Spotify' });
+            return;
+        }
+
+        spotify.setAccessToken(room.host.spotifyToken);
         const results = await spotify.searchTracks(query as string);
 
-        // Simplify the response
         const simplifiedTracks = results.body.tracks?.items.map(track => ({
             id: track.id,
             title: track.name,
